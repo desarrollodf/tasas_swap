@@ -42,6 +42,8 @@ jobs:
           git add datos.xlsx
 
           if git diff --cached --quiet; then
-    commit -m 'Actualizar datos automaticamente'
+            echo 'No hay cambios en datos.xlsx'
+          else
+            git commit -m 'Actualizar datos automaticamente'
             git push origin main
           fi
