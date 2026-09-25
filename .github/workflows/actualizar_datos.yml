@@ -16,10 +16,10 @@ jobs:
 
     steps:
       - name: Descargar repositorio
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Configurar Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v7
         with:
           python-version: "3.12"
 
@@ -41,6 +41,9 @@ jobs:
 
           git add datos.xlsx
 
-          if gizar datos automaticamente"
+          if git diff --cached --quiet; then
+            echo "No hay cambios en datos.xlsx"
+          else
+            git commit -m "Actualizar datos automaticamente"
             git push
           fi
