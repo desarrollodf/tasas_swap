@@ -1,0 +1,76 @@
+"0","source(""setup.R"")
+"
+"2","Registered S3 method overwritten by 'quantmod':
+  method            from
+  as.zoo.data.frame zoo 
+"
+"2","── [1mAttaching core tidyquant packages[22m ───────────────────────────── tidyquant 1.0.9 ──
+[32m✔[39m [34mPerformanceAnalytics[39m 2.0.4      [32m✔[39m [34mTTR                 [39m 0.24.4
+[32m✔[39m [34mquantmod            [39m 0.4.26     [32m✔[39m [34mxts                 [39m 0.14.1"
+"2","── [1mConflicts[22m ─────────────────────────────────────────────── tidyquant_conflicts() ──
+[31m✖[39m [34mzoo[39m::[32mas.Date()[39m                 masks [34mbase[39m::as.Date()
+[31m✖[39m [34mzoo[39m::[32mas.Date.numeric()[39m         masks [34mbase[39m::as.Date.numeric()
+[31m✖[39m [34mscales[39m::[32mcol_factor()[39m           masks [34mreadr[39m::col_factor()
+[31m✖[39m [34mscales[39m::[32mdiscard()[39m              masks [34mpurrr[39m::discard()
+[31m✖[39m [34mplotly[39m::[32mfilter()[39m               masks [34mdplyr[39m::filter(), [34mstats[39m::filter()
+[31m✖[39m [34mxts[39m::[32mfirst()[39m                   masks [34mdplyr[39m::first()
+[31m✖[39m [34mdplyr[39m::[32mlag()[39m                   masks [34mstats[39m::lag()
+[31m✖[39m [34mxts[39m::[32mlast()[39m                    masks [34mdplyr[39m::last()
+[31m✖[39m [34mPerformanceAnalytics[39m::[32mlegend()[39m masks [34mgraphics[39m::legend()
+[31m✖[39m [34mquantmod[39m::[32msummary()[39m            masks [34mbase[39m::summary()
+[36mℹ[39m Use the ]8;;http://conflicted.r-lib.org/conflicted package]8;; to force all conflicts to become errors"
+"2","
+Attaching package: ‘DT’
+
+"
+"2","The following objects are masked from ‘package:shiny’:
+
+    dataTableOutput, renderDataTable
+
+"
+"2","
+Attaching package: ‘kableExtra’
+
+"
+"2","The following object is masked from ‘package:dplyr’:
+
+    group_rows
+
+"
+"2","
+Attaching package: ‘gridExtra’
+
+"
+"2","The following object is masked from ‘package:dplyr’:
+
+    combine
+
+"
+"2","
+Attaching package: ‘httr’
+
+"
+"2","The following object is masked from ‘package:plotly’:
+
+    config
+
+"
+"2","
+Attaching package: ‘jsonlite’
+
+"
+"2","The following objects are masked from ‘package:rjson’:
+
+    fromJSON, toJSON
+
+"
+"2","The following object is masked from ‘package:purrr’:
+
+    flatten
+
+"
+"2","The following object is masked from ‘package:shiny’:
+
+    validate
+
+"

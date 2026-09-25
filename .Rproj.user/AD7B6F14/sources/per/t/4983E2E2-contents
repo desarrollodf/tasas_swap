@@ -1,0 +1,180 @@
+rm(list = ls())
+
+# Librerías
+
+library(shiny)
+library(readxl)
+library(dplyr)
+library(tidyverse)
+library(zoo)
+library(ggplot2)
+library(plotly)
+library(scales)
+library(lubridate)
+library(rsconnect)
+library(RColorBrewer)
+library(readxl)
+
+series_posnet <- c(
+  "F099.DER.STO.Z.40.R.42.NET.Z.MMUSD.MLME.Z.Z.0.D",
+  "F099.DER.STO.Z.40.R.55A.NET.Z.MMUSD.MLME.Z.Z.0.D",
+  "F099.DER.STO.Z.40.R.44.NET.Z.MMUSD.MLME.Z.Z.0.D",
+  "F099.DER.STO.Z.40.R.39.NET.Z.MMUSD.MLME.Z.Z.0.D",
+  "F099.DER.STO.Z.40.R.38.NET.Z.MMUSD.MLME.Z.Z.0.D",
+  "F099.DER.STO.Z.40.R.50.NET.Z.MMUSD.MLME.Z.Z.0.D",
+  "F099.DER.STO.Z.40.N.NR.NET.Z.MMUSD.MLME.Z.Z.0.D"
+)
+colores_posnet <- c("#FF6F61", "#FFD166", "#66BFBF", "#6B4226", "#957DAD", "#54A24B", "#C51605")
+codigos_posnet <- c(
+  "AFP" = "afp",
+  "Sector real" = "real",
+  "Aseguradoras" = "segur",
+  "Corredoras" = "corr",
+  "AGF" = "agf",
+  "Otros" = "otros",
+  "No residentes" = "nores"
+)
+
+if (FALSE) {
+  source("setup.R")
+  posnet <- get(series_posnet, codigos_posnet) %>%
+    na.omit(posnet) %>%
+    group_by(code) %>%
+    mutate(cambio = value - lag(value)) %>%
+    ungroup()
+  posnet_resnb_sum <- posnet %>%
+    filter(code != "nores") %>%
+    group_by(date) %>%
+    summarise(value = sum(value)) %>%
+    mutate(
+      code = "resnb",
+      cambio = value - lag(value)
+    )
+  posnet <- bind_rows(posnet, posnet_resnb_sum)
+  posnet_total_sum <- posnet %>%
+    filter(code %in% c("resnb", "nores")) %>%
+    group_by(date) %>%
+    summarise(value = sum(value)) %>%
+    mutate(
+      code = "posnet",
+      cambio = value - lag(value)
+    )
+  posnet <- bind_rows(posnet, posnet_total_sum)
+  write_xlsx(posnet, "posnet.xlsx")
+}
+
+posnet <- read_xlsx("posnet.xlsx") %>%
+  mutate(
+    code = factor(code, levels = codigos_posnet, labels = names(codigos_posnet)),
+    tooltip = paste0(
+      code, "<br>",
+      "Valor: ", prettyNum(round(value), big.mark = ".", decimal.mark = ","), "<br>",
+      "Fecha: ", format(date, "%m-%Y")
+    )
+  )
+
+# Shiny
+
+ui <- fluidPage(
+  
+  tags$head(
+    tags$style(HTML("
+    
+    body, .container-fluid, .main-panel {
+      background-color: transparent !important;
+      margin: 0 !important;
+      padding-bottom: 0 !important;
+    }
+    
+  .radio-inline input[type='radio'] {
+    transform: scale(0.8) !important;   /* achica el botón circular */
+    margin-right: 6px;
+  }
+
+  .radio-inline {
+    font-size: 10px !important;         /* achica el texto */
+    margin-right: 15px;                 /* espacio entre botones */
+  }
+  
+  .shiny-input-radiogroup {
+    margin-bottom: 0px !important;  /* Ajusta aquí según tu necesidad */
+  }
+  
+  "))
+  ),
+  
+  tags$h4("Posición en Moneda Extranjera", style = "font-weight: bold;"),
+  tags$h6("Valores sobre cero reflejan una posición neta a favor del peso chileno en el mercado derivado."),
+  tags$p("Por: Benjamín Pescio", style = "font-size: 11px; margin: 1;"),
+  
+  fluidRow(
+    column(width = 12,
+           div(
+             id = "grafico-container",
+             class = "fade-in",
+             style = "position: relative; left: -10px;",
+             plotlyOutput("grafico", height = "300px", width = "100%")
+           ),
+           tags$div(
+             style = "display: flex; justify-content: space-between; align-items: center;
+                      margin-top: 0px;",
+             tags$div("Fuente: Banco Central", style = "font-size: 10px; color: black;"),
+             tags$img(src = "footer.png", height = "20px")
+             )
+           )
+    )
+  )
+
+server <- function(input, output, session) {
+  
+  output$grafico <- renderPlotly({
+    
+    grafico <- posnet %>%
+      filter(code == names(codigos_posnet[7])) %>%
+      ggplot(aes(x = date, y = value, color = code)) +
+      theme_minimal() +
+      geom_hline(yintercept = 0, alpha = 0.1, linewidth = 1) +
+      geom_line(linewidth = 0.8) +
+      geom_point(aes(text = tooltip), alpha = 0) +
+      scale_color_manual(
+        values = colores_posnet[7], name = NULL
+      ) +
+      labs(x = NULL, y = "Millones de dólares (US$)") +
+      scale_y_continuous(
+        labels = label_number(big.mark = ".", decimal.mark = ",")
+      ) +
+      theme(
+        panel.background = element_rect(fill = "transparent", color = NA),
+        plot.background = element_rect(fill = "transparent", color = NA),
+        axis.title.y = element_text(size = 8)
+      )
+    
+    # Convertir a plotly
+    
+    ggplotly(grafico, tooltip = "text") %>%
+      plotly::layout(
+        dragmode = FALSE,
+        legend = list(
+          orientation = "h",
+          x = 0,
+          y = 1.2,
+          xanchor = "left",
+          font = list(size = 9),
+          tracegroupgap = 0,
+          itemsizing = "constant"
+        )
+      ) %>%
+      plotly::config(
+        displayModeBar = FALSE,
+        showTips = FALSE,
+        scrollZoom = FALSE,
+        doubleClick = FALSE,
+        staticPlot = FALSE,
+        displaylogo = FALSE,
+        responsive = TRUE
+        )
+    
+  })
+}
+
+shinyApp(ui, server)
