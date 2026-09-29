@@ -46,15 +46,30 @@ jobs:
 
           cp datos.xlsx /tmp/datos.xlsx
 
-          git fetch origin main
-          git reset --hard origin/main
+          for intento in 1 2 3; do
+            echo "Intento ${intento} de guardar datos"
 
-          cp /tmp/datos.xlsx datos.xlsx
-          git add datos.xlsx
+            git fetch origin main
+            git reset --hard origin/main
 
-          if git diff --cached --quiet; then
-            echo 'No hay cambios en datos.xlsx'
-          else
+            cp /tmp/datos.xlsx datos.xlsx
+            git add datos.xlsx
+
+            if git diff --cached --quiet; then
+              echo 'No hay cambios en datos.xlsx'
+              exit 0
+            fi
+
             git commit -m 'Actualizar datos automaticamente'
-            git push origin main
-          fi
+
+            if git push origin main; then
+              echo 'Push realizado correctamente'
+              exit 0
+            fi
+
+            echo 'El remoto cambio durante el push. Reintentando...'
+            sleep 5
+          done
+
+          echo 'No fue posible actualizar main despues de 3 intentos'
+          exit 1
