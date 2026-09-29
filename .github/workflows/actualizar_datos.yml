@@ -9,6 +9,10 @@ on:
 
 permissions:
   contents: write
+  
+concurrency:
+  group: actualizar-datos
+  cancel-in-progress: true
 
 jobs:
   actualizar:
@@ -39,12 +43,18 @@ jobs:
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+
+          cp datos.xlsx /tmp/datos.xlsx
+
+          git fetch origin main
+          git reset --hard origin/main
+
+          cp /tmp/datos.xlsx datos.xlsx
           git add datos.xlsx
 
           if git diff --cached --quiet; then
             echo 'No hay cambios en datos.xlsx'
           else
             git commit -m 'Actualizar datos automaticamente'
-            git pull --rebase origin main
             git push origin main
           fi
