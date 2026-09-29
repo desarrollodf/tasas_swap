@@ -45,5 +45,6 @@ jobs:
             echo 'No hay cambios en datos.xlsx'
           else
             git commit -m 'Actualizar datos automaticamente'
+            git pull --rebase origin main
             git push origin main
           fi
